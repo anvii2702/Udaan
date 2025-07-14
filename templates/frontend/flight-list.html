@@ -1,0 +1,1310 @@
+{% extends 'frontend/base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% comment %} This page Css {% endcomment %}
+{% block style %}
+<style>
+    .display-area {
+        cursor: pointer;
+        padding: 10px;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+    }
+
+ 
+
+    .booking-form {
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+;
+        border-radius: 10px;
+        z-index: 10;
+        transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+    }
+
+    .booking-form-header h5 {
+        margin: 0;
+    }
+
+    .section label {
+        font-weight: bold;
+    }
+
+    .section .inputs p {
+        cursor: pointer;
+        margin-bottom: 0;
+        margin-right: 10px;
+    }
+
+    .form-check-label {
+        margin-left: 5px;
+    }
+
+    .apply-btn {
+        text-align: center;
+        display: block;
+        width: 100%;
+        font-weight: bold;
+    }
+
+    .btn-outline-primary.active {
+        background-color: #7a6deb;
+        color: #fff;
+        border-color: #7a6deb;
+    }
+</style>
+{% comment %} <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+	$(document).ready(function(){
+		let offset = 0;
+		const limit = 10;
+
+		function loadMoreData() {
+			$.ajax({
+				url: "{% url 'infinite-scroll' %}",
+				data: {
+					offset: offset,
+					limit: limit
+				},
+				success: function(data) {
+					data.forEach(item => {
+						$('ul#data-list').append(
+							`<li><strong>${item.name}</strong><br>${item.description}</li>`
+						);
+					});
+					offset += limit;
+				}
+			});
+		}
+
+		// Load initial data
+		loadMoreData();
+
+		// Load more data when scrolling to the bottom
+		$(window).scroll(function() {
+			if ($(window).scrollTop() + $(window).height() == $(document).height()) {
+				loadMoreData();
+			}
+		});
+	});
+</script> {% endcomment %}
+<link rel="stylesheet" type="text/css" href="{% static 'vendor/nouislider/nouislider.css' %}">
+{% endblock style %}
+{% block body %}
+
+<!-- **************** MAIN CONTENT START **************** -->
+<main>
+
+<!-- =======================
+Search START -->
+<section class="pt-0">
+	<div class="container">
+		<div class="row">
+			<div class="col-12">
+				<!-- Booking from START -->
+				<form class="bg-mode border rounded position-relative px-4 pt-4 mb-4 mb-sm-0">
+					<div class="row g-4">
+						<!-- Nav tabs START -->
+						<div class="col-lg-6">
+							<ul class="nav nav-pills nav-pills-dark" id="pills-tab" role="tablist">
+								<li class="nav-item" role="presentation">
+									{% if parseData.Travel_Type == 0 %}
+										<button class="nav-link rounded-start rounded-0 mb-0 active" id="pills-one-way-tab" data-bs-toggle="pill" data-bs-target="#pills-one-way" type="button" role="tab" aria-selected="true">One Way</button>
+									{% else %}
+										<button class="nav-link rounded-start rounded-0 mb-0" id="pills-one-way-tab" data-bs-toggle="pill" data-bs-target="#pills-one-way" type="button" role="tab" aria-selected="false">One Way</button>
+									{% endif %}
+								</li>
+								<li class="nav-item" role="presentation">
+									{% if parseData.Travel_Type == 1 %}
+										<button class="nav-link rounded-end rounded-0 mb-0 active" id="pills-round-trip-tab" data-bs-toggle="pill" data-bs-target="#pills-round-trip" type="button" role="tab" aria-selected="true">Round Trip</button>
+									{% else %}
+										<button class="nav-link rounded-end rounded-0 mb-0" id="pills-round-trip-tab" data-bs-toggle="pill" data-bs-target="#pills-round-trip" type="button" role="tab" aria-selected="false">Round Trip</button>
+									{% endif %}
+								</li>
+							</ul>
+						</div>
+						<!-- Nav tabs END -->
+	
+						<!-- Ticket class -->
+						<div class="col-lg-3 ms-auto">
+							<div class="form-fs-lg bg-light rounded-3 h-100 p-3">
+								<div class="display-area px-2 dbba" onclick="toggleBookingFormOneWay()" style="white-space: nowrap;">
+									<div>
+										<small>Travellers & Class</small>
+										<div class="ms-3 mt-2">
+											<h4 style="margin-bottom: 0; display: inline;" id="numTravellersOneWay">{{parseData.Adult_Count |add:parseData.Child_Count |add:parseData.Infant_Count}}</h4><span>&nbsp;Traveller</span><br>
+											<small style="white-space: nowrap;" id="travelClassOneWay">{{parseData.Class_Of_Travel}}</small>
+										</div>
+										<span hidden id="adultCountOneWay">0</span>
+										<span hidden id="childrenCountOneWay">0</span>
+										<span hidden id="infantCountOneWay">0</span>
+
+										<span hidden id="parseDataAdultCount">{{parseData.Adult_Count}}</span>
+										<span hidden id="parseDataChildCount">{{parseData.Child_Count}}</span>
+										<span hidden id="parseDataInfantCount">{{parseData.Infant_Count}}</span>
+									</div>
+								</div>
+								<div class="booking-form p-3 card" id="bookingFormOneWay" style="display: none; position: absolute; right: 0; transform: scale(80%);">
+									<div class="booking-form-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+										<h5>Booking Form</h5>
+									</div>
+									<div class="section" style="margin-bottom: 10px;">
+										<label>ADULTS (12y+)</label>
+										<div class="inputs" id="adultOneWay"></div>
+									</div>
+									<div class="section" style="margin-bottom: 10px;">
+										<label>CHILDREN (2y-12y)</label>
+										<div class="inputs" id="childrenOneWay"></div>
+									</div>
+									<div class="section" style="margin-bottom: 10px;">
+										<label>INFANTS (below 2y)</label>
+										<div class="inputs" id="infantOneWay"></div>
+									</div>
+									<div class="section" style="margin-bottom: 10px;">
+										<label>Choose Travel Class:</label>
+										<div class="inputs" id="travelClassButtonsOneWay">
+											<p class="btn btn-outline-primary {% if parseData.Class_Of_Travel == 'ECONOMY' %} active {% endif %}" onclick="updateTravelClass('ECONOMY', this)">Economy</p>
+											<p class="btn btn-outline-primary {% if parseData.Class_Of_Travel == 'PREMIUM_ECONOMY' %} active {% endif %}" onclick="updateTravelClass('PREMIUM_ECONOMY', this)">Premium Economy</p>
+											<p class="btn btn-outline-primary {% if parseData.Class_Of_Travel == 'BUSINESS' %} active {% endif %}" onclick="updateTravelClass('BUSINESS', this)">Business</p>
+											<p class="btn btn-outline-primary {% if parseData.Class_Of_Travel == 'FIRST' %} active {% endif %}" onclick="updateTravelClass('FIRST', this)">First</p>
+										</div>
+									</div>
+									<div class="form-check">
+										<input class="form-check-input" type="checkbox" id="directFlightOneWay">
+										<label class="form-check-label" for="directFlightOneWay">Direct Flight</label>
+									</div>
+									<div class="form-check">
+										<input class="form-check-input" type="checkbox" id="connectingFlightOneWay">
+										<label class="form-check-label" for="connectingFlightOneWay">Connecting Flight</label>
+									</div>
+									<br>
+									<p class="apply-btn btn btn-primary" style="width: 100%; padding: 10px; color: white; border: none; border-radius: 5px; cursor: pointer;" onclick="updateDisplay(); event.stopPropagation()">APPLY</p>
+								</div>
+							</div>
+						</div>
+					</div>
+	
+					<!-- Tab content START -->
+					<div class="tab-content mt-4" id="pills-tabContent">
+						<!-- One way tab START -->
+						<div class="tab-pane fade {% if parseData.Travel_Type == 0 %} show active {% endif %}" id="pills-one-way" role="tabpanel" aria-labelledby="pills-one-way-tab">
+							<div class="row g-4">
+								<!-- Leaving From -->
+								<div class="col-md-6 col-lg-4 position-relative">
+									<div class="form-border-transparent form-fs-lg bg-light rounded-3 h-100 p-3">
+										<!-- Input field -->
+										<label class="mb-1"><i class="bi bi-geo-alt me-2"></i>From</label>
+										<select class="form-select js-choice" data-search-enabled="true">
+											<option value="">Select location</option>
+											{% for i in airport %}
+												{% if parseData.TripInfo.0.Origin == i.code %}
+													<option value="{{i.code}}" selected>{{i.city}}</option>
+												{% else %}
+													<option value="{{i.code}}">{{i.city}}</option>
+												{% endif %}
+											{% endfor %}
+										</select>
+									</div>
+									<!-- Auto fill button -->
+									<div class="btn-flip-icon mt-3 mt-md-0">
+										<button class="btn btn-white shadow btn-round mb-0"><i class="fa-solid fa-right-left"></i></button>
+								 </div>
+								</div>
+	
+								<!-- Going To -->
+								<div class="col-md-6 col-lg-4">
+										<div class="form-border-transparent form-fs-lg bg-light rounded-3 h-100 p-3">
+											<!-- Input field -->
+											<label class="mb-1"><i class="bi bi-send me-2"></i>To</label>
+											<select class="form-select js-choice" data-search-enabled="true">
+												<option value="">Select location</option>
+												{% for i in airport %}
+													{% if parseData.TripInfo.0.Destination == i.code %}
+														<option value="{{i.code}}" selected>{{i.city}}</option>
+													{% else %}
+														<option value="{{i.code}}">{{i.city}}</option>
+													{% endif %}
+												{% endfor %}
+											</select>
+										</div>
+									</div>
+	
+								<!-- Departure -->
+								<div class="col-lg-4">
+									<div class="form-border-transparent form-fs-lg bg-light rounded-3 h-100 p-3">
+										<label class="mb-1"><i class="bi bi-calendar me-2"></i>Departure</label>
+										<input type="text" class="form-control flatpickr" placeholder="Select date" data-date-format="d M Y" value="{{parseData.TripInfo.0.TravelDate}}">
+									</div>
+								</div>
+	
+								<div class="col-12 text-end pt-0">
+									<a  class="btn btn-primary mb-n4" href="#">Find ticket <i class="bi bi-arrow-right ps-3"></i></a>
+								</div>
+							</div>
+						</div>
+						<!-- One way tab END -->
+						<!-- Round way tab END -->
+						<div class="tab-pane fade {% if parseData.Travel_Type == 1 %} show active {% endif %}" id="pills-round-trip" role="tabpanel" aria-labelledby="pills-round-trip-tab">
+							<div class="row g-4">
+	
+								<!-- Leaving From -->
+								<div class="col-md-6 col-xl-3 position-relative">
+									<div class="form-border-transparent form-fs-lg bg-light rounded-3 h-100 p-3">
+										<!-- Input field -->
+										<label class="mb-1"><i class="bi bi-geo-alt me-2"></i>From</label>
+										<select class="form-select js-choice" data-search-enabled="true">
+											<option value="">Select location</option>
+											{% for i in airport %}
+												{% if parseData.TripInfo.0.Origin == i.code %}
+													<option value="{{i.code}}" selected>{{i.city}}</option>
+												{% else %}
+													<option value="{{i.code}}">{{i.city}}</option>
+												{% endif %}
+											{% endfor %}
+										</select>
+									</div>
+									
+									<!-- Auto fill button -->
+									<div class="btn-flip-icon mt-3 mt-md-0">
+										 <button class="btn btn-white shadow btn-round mb-0"><i class="fa-solid fa-right-left"></i></button>
+									</div>
+								</div>
+	
+								<!-- Going To -->
+								<div class="col-md-6 col-xl-3">
+									<div class="form-border-transparent form-fs-lg bg-light rounded-3 h-100 p-3">
+										<!-- Input field -->
+										<label class="mb-1"><i class="bi bi-send me-2"></i>To</label>
+										<select class="form-select js-choice" data-search-enabled="true">
+											<option value="">Select location</option>
+											{% for i in airport %}
+												{% if parseData.TripInfo.0.Destination == i.code %}
+													<option value="{{i.code}}" selected>{{i.city}}</option>
+												{% else %}
+													<option value="{{i.code}}">{{i.city}}</option>
+												{% endif %}
+											{% endfor %}
+										</select>
+									</div>
+								</div>
+	
+								<!-- Departure -->
+								<div class="col-md-6 col-xl-3">
+									<div class="form-border-transparent form-fs-lg bg-light rounded-3 h-100 p-3">
+										<label class="mb-1"><i class="bi bi-calendar me-2"></i>Departure</label>
+										<input type="text" class="form-control flatpickr" placeholder="Select date" data-date-format="d M Y" value="{{parseData.TripInfo.0.TravelDate}}">
+									</div>
+								</div>
+	
+								<!-- Return -->
+								<div class="col-md-6 col-xl-3">
+									<div class="form-border-transparent form-fs-lg bg-light rounded-3 h-100 p-3">
+										<label class="mb-1"><i class="bi bi-calendar me-2"></i>Return</label>
+										<input type="text" class="form-control flatpickr" placeholder="Select date" data-date-format="d M Y" value="{{parseData.TripInfo.1.TravelDate}}">
+									</div>
+								</div>
+	
+								<div class="col-12 text-end pt-0">
+									<a  class="btn btn-primary mb-n4" href="#">Find ticket <i class="bi bi-arrow-right ps-3"></i></a>
+								</div>
+							</div>
+						</div>
+						<!-- Round way tab END -->
+					</div>
+					<!-- Tab content END -->
+				</form>
+				<!-- Booking from END -->
+			</div>
+		</div>
+	</div>
+</section>
+<!-- =======================
+Search START -->
+	
+<!-- =======================
+Title and notice board START -->
+
+<!-- {{parseData}} iss code se data aajayega -->
+
+<section class="pt-0">
+	<div class="container position-relative">
+
+		<!-- Title and button START -->
+		<div class="row">
+			<div class="col-12">
+				<div class="d-sm-flex justify-content-sm-between align-items-center">
+					<!-- Title -->
+					<div class="mb-3 mb-sm-0">
+						<h1 class="fs-3">09 Flight Available</h1>
+						<ul class="nav nav-divider h6 mb-0">
+							<li class="nav-item">25 Jan</li>
+							<li class="nav-item">1 Stop</li>
+						</ul>
+					</div>
+
+					<!-- Offcanvas Button -->
+					<!-- Removed Filter Result Button -->
+
+				</div>	
+			</div>
+		</div>
+		<!-- Title and button END -->
+
+		<!-- Notice board START -->
+		<div class="bg-primary bg-opacity-10 rounded-3 overflow-hidden mt-4 p-4">
+			<div class="row g-4 align-items-center">
+				<!-- Image -->
+				<div class="col-6 col-md-3 text-center order-1">
+					<img src="{% static 'images/element/11.svg' %}" class="mb-n5" alt="">
+				</div>
+
+				<!-- Content -->
+				<div class="col-md-6 order-md-2">
+					<!-- Title -->
+					<h4>International Guideline</h4>
+					<!-- Content -->
+					<p class="mb-2">COVID safety measures adopted by various countries including VISA restrictions, quarantine rules, etc.</p>
+					<!-- Button -->
+					<a href="#" class="btn btn-sm btn-primary mb-0">View Guidelines</a>
+				</div>
+
+				<!-- Image -->
+				<div class="col-6 col-md-3 text-center order-3">
+					<img src="{% static 'images/element/10.svg' %}" class="mb-n5" alt="">
+				</div>
+			</div>
+		</div>
+		<!-- Notice board END -->
+
+	</div>
+</section>
+<!-- =======================
+Title and notice board END -->
+
+<!-- =======================
+Flight list START -->
+
+<section class="pt-0">
+	<div class="container">
+		<div class="row">
+
+			<!-- Left sidebar START -->
+			<aside class="col-xl-4 col-xxl-3">
+				<!-- Responsive offcanvas body START -->
+					<div class="offcanvas-xl offcanvas-end" tabindex="-1" id="offcanvasSidebar" aria-labelledby="offcanvasSidebarLabel">
+						<!-- Offcanvas header -->
+						<div class="offcanvas-header">
+							<h5 class="offcanvas-title" id="offcanvasSidebarLabel">Advance Filters</h5>
+							<button  type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#offcanvasSidebar" aria-label="Close"></button>
+						</div>
+
+						<!-- Offcanvas body -->
+						<div class="offcanvas-body flex-column p-3 p-xl-0">
+							<form class="rounded-3 shadow">
+								<!-- Popular filters START -->
+								<div class="card card-body rounded-0 rounded-top p-4">
+									<!-- Title -->
+									<h6 class="mb-2">Popular Filters</h6>
+									<!-- Popular filters group -->
+									<div class="col-12">
+										<!-- Checkbox -->
+										<div class="d-flex justify-content-between align-items-center">
+											<div class="form-check">
+												<input class="form-check-input" type="checkbox" id="popolarType1">
+												<label class="form-check-label" for="popolarType1">Refundable Fare</label>
+											</div>
+											<span class="small">(41)</span>
+										</div>	
+										<!-- Checkbox -->
+										<div class="d-flex justify-content-between align-items-center">
+											<div class="form-check">
+												<input class="form-check-input" type="checkbox" id="popolarType2">
+												<label class="form-check-label" for="popolarType2">1 Stop</label>
+											</div>
+											<span class="small">(20)</span>
+										</div>	
+										<!-- Checkbox -->
+										<div class="d-flex justify-content-between align-items-center">
+											<div class="form-check">
+												<input class="form-check-input" type="checkbox" id="popolarType3">
+												<label class="form-check-label" for="popolarType3">Late Departure</label>
+											</div>
+											<span class="small">(4)</span>
+										</div>
+										<!-- Checkbox -->
+										<div class="d-flex justify-content-between align-items-center">
+											<div class="form-check">
+												<input class="form-check-input" type="checkbox" id="popolarType4">
+												<label class="form-check-label" for="popolarType4">Non-Stop</label>
+											</div>
+											<span class="small">(2)</span>
+										</div>
+									</div>
+								</div>
+								<!-- Popular filters END -->
+
+								<hr class="my-0"> <!-- Divider -->
+
+								<!-- Price START -->
+								<div class="card card-body rounded-0 p-4">
+									<!-- Title -->
+									<h6 class="mb-2">Price</h6>
+									<!-- Price group -->
+									<div class="position-relative">
+										<div class="noui-wrapper">
+											<div class="d-flex justify-content-between">
+												<input type="text" class="text-body input-with-range-min">
+												<input type="text" class="text-body input-with-range-max">
+											</div>
+											<div class="noui-slider-range mt-2" data-range-min='500' data-range-max='2000' data-range-selected-min='700' data-range-selected-max='1500'></div>
+										</div>
+									</div>
+								</div>
+								<!-- Price END -->
+
+								<hr class="my-0"> <!-- Divider -->
+
+								<!-- Onward stops START -->
+								<div class="card card-body rounded-0 p-4">
+									<!-- Title -->
+									<h6 class="mb-2">Onward Stops</h6>
+									<!-- Onward stops group -->
+									<ul class="list-inline mb-0 g-3">
+										<!-- Item -->
+										<li class="list-inline-item mb-0">
+											<input type="checkbox" class="btn-check" id="btn-check-c1">
+											<label class="btn btn-sm btn-light btn-primary-soft-check" for="btn-check-c1">Direct</label>
+										</li>
+										<!-- Item -->
+										<li class="list-inline-item mb-0">
+											<input type="checkbox" class="btn-check" id="btn-check-c2">
+											<label class="btn btn-sm btn-light btn-primary-soft-check" for="btn-check-c2">1 Stop</label>
+										</li>
+										<!-- Item -->
+										<li class="list-inline-item mb-0">
+											<input type="checkbox" class="btn-check" id="btn-check-c3">
+											<label class="btn btn-sm btn-light btn-primary-soft-check" for="btn-check-c3">2+ Stops</label>
+										</li>
+									</ul>
+								</div>
+								<!-- Onward stops END -->
+
+								<hr class="my-0"> <!-- Divider -->
+
+								<!-- Return Stops START -->
+								<div class="card card-body rounded-0 p-4">
+									<!-- Title -->
+									<h6 class="mb-2">Return Stops</h6>
+									<!-- Return Stops group -->
+									<ul class="list-inline mb-0 g-3">
+										<!-- Item -->
+										<li class="list-inline-item mb-0">
+											<input type="checkbox" class="btn-check" id="btn-check-6">
+											<label class="btn btn-sm btn-light btn-primary-soft-check" for="btn-check-6">Direct</label>
+										</li>
+										<!-- Item -->
+										<li class="list-inline-item mb-0">
+											<input type="checkbox" class="btn-check" id="btn-check-7">
+											<label class="btn btn-sm btn-light btn-primary-soft-check" for="btn-check-7">1 Stop</label>
+										</li>
+										<!-- Item -->
+										<li class="list-inline-item mb-0">
+											<input type="checkbox" class="btn-check" id="btn-check-8">
+											<label class="btn btn-sm btn-light btn-primary-soft-check" for="btn-check-8">2+ Stops</label>
+										</li>
+									</ul>
+								</div>
+								<!-- Return Stops END -->
+
+								<hr class="my-0"> <!-- Divider -->
+
+								<!-- Preferred Airline START -->
+								<div class="offcanvas-body flex-column p-3 p-xl-0">
+									<form class="rounded-3 shadow">
+										<!-- Other filter sections -->
+								
+										<!-- Preferred Airline Section -->
+										<div class="card card-body rounded-0 p-4">
+											<!-- Title -->
+											<h6 class="mb-2">Preferred Airline</h6>
+											<!-- Airline checkboxes go here -->
+											<div class="col-12" id="airlineContainer"></div>
+										</div>
+								
+										<!-- Other filter sections -->
+									</form>
+								</div>
+								
+								<!-- Preferred Airline END -->
+
+								<hr class="my-0"> <!-- Divider -->
+
+								<!-- Layover Airport START -->
+								<div class="card card-body rounded-0 rounded-bottom p-4">
+									<!-- Title -->
+									<h6 class="mb-2">Layover Airport</h6>
+									<!-- Layover Airport group -->
+									<div class="col-12">
+										<!-- Checkbox -->
+										<div class="d-flex justify-content-between align-items-center">
+											<div class="form-check">
+												<input class="form-check-input" type="checkbox" value="" id="lauoverType1">
+												<label class="form-check-label" for="lauoverType1">Abu Dhabi</label>
+											</div>
+											<span class="small">(01)</span>
+										</div>	
+										<!-- Checkbox -->
+										<div class="d-flex justify-content-between align-items-center">
+												<div class="form-check">
+													<input class="form-check-input" type="checkbox" value="" id="lauoverType2">
+													<label class="form-check-label" for="lauoverType2">Amsterdam</label>
+												</div>
+												<span class="small">(02)</span>
+											</div>
+											<!-- Checkbox -->
+											<div class="d-flex justify-content-between align-items-center">
+												<div class="form-check">
+													<input class="form-check-input" type="checkbox" value="" id="lauoverType3">
+													<label class="form-check-label" for="lauoverType3">Chicago</label>
+												</div>
+												<span class="small">(02)</span>
+											</div>
+											<!-- Checkbox -->
+											<div class="d-flex justify-content-between align-items-center">
+												<div class="form-check">
+													<input class="form-check-input" type="checkbox" value="" id="lauoverType4">
+													<label class="form-check-label" for="lauoverType4">Doha</label>
+												</div>
+												<span class="small">(03)</span>
+											</div>
+										
+										<!-- Collapse body -->
+										<div class="multi-collapse collapse" id="lauoverCollapes">
+											<!-- Checkbox -->
+											<div class="d-flex justify-content-between align-items-center">
+												<div class="form-check">
+													<input class="form-check-input" type="checkbox" value="" id="lauoverType7">
+													<label class="form-check-label" for="lauoverType7">Dubai</label>
+												</div>
+												<span class="small">(04)</span>
+											</div>
+											<!-- Checkbox -->
+											<div class="d-flex justify-content-between align-items-center">
+												<div class="form-check">
+													<input class="form-check-input" type="checkbox" value="" id="lauoverType8">
+													<label class="form-check-label" for="lauoverType8">New Delhi</label>
+												</div>
+												<span class="small">(15)</span>
+											</div>
+											<!-- Checkbox -->
+											<div class="d-flex justify-content-between align-items-center">
+												<div class="form-check">
+													<input class="form-check-input" type="checkbox" value="" id="lauoverType9">
+													<label class="form-check-label" for="lauoverType9">Paris</label>
+												</div>
+												<span class="small">(04)</span>
+											</div>
+										</div>
+										<!-- Collapse button -->
+										<a class="btn-more d-flex align-items-center collapsed p-0 mb-0 mt-2" data-bs-toggle="collapse" href="#lauoverCollapes" role="button" aria-expanded="false" aria-controls="lauoverCollapes">
+											See <span class="see-more ms-1">more</span><span class="see-less ms-1">less</span><i class="fa-solid fa-angle-down ms-2"></i>
+										</a>
+									</div>
+								</div>
+								<!-- Layover Airport END -->
+							</form><!-- Form End -->
+						</div>
+
+						<!-- Buttons -->
+						<div class="d-flex justify-content-between p-2 p-xl-0 mt-xl-4">
+							<button class="clear-all btn btn-link p-0 mb-0">Clear all</button>
+						</div>
+	
+					</div>
+				<!-- Responsive offcanvas body END -->
+			</aside>
+			<!-- Left sidebar END -->
+
+			<!-- Main content START -->
+			 {% comment %} FLYSHOP DATA {% endcomment %}
+			<div class="col-xl-8 col-xxl-9">
+				<div class="vstack gap-4">
+					<!-- Replaced for loop with JavaScript map function -->
+					
+					<!-- Action box START -->
+					<div class="bg-success bg-opacity-10 p-3 rounded-2 d-sm-flex justify-content-sm-between align-items-center">
+						<!-- Title and badge -->
+						<div class="d-flex align-items-center mb-3 mb-sm-0">
+							<div class="position-relative z-index-1 me-2">
+								<img src="{% static 'images/element/05.svg' %}" class="position-relative h-40px" alt="">
+								<span class="smaller text-white position-absolute top-50 start-50 translate-middle">New</span>
+							</div>
+							<!-- Title -->
+							<h6 class="mb-0 fw-normal">Get <strong class='text-success'>12% Off</strong> On Your First Flight</h6>
+						</div>
+
+						<!-- Button -->
+						<a href="#" class="btn btn-sm btn-success mb-0">Login / Signup</a>
+						</div>
+						<!-- Action box END -->
+
+						<!-- Ticket item START -->
+						<div class="card border">
+							<!-- Card header -->
+							<div class="card-header">
+								<div class="d-md-flex justify-content-md-between">
+									<!-- Airline Name -->
+									<div class="d-flex align-items-center mb-2 mb-md-0">
+										<img src="{% static 'images/element/14.svg' %}" class="w-30px me-2" alt="">
+										<h6 class="fw-normal mb-0">Folio Airline (CCE - 2158)</h6>
+									</div>
+									<h6 class="fw-normal mb-0"><span class="text-body">Travel Class:</span> Economy</h6>
+								</div>
+							</div>
+
+						
+							<!-- Card footer -->
+							<div class="card-footer pt-4">
+								<div class="">
+									<ul class="list-inline bg-light d-sm-flex text-center justify-content-sm-between rounded-2 py-2 px-4 mb-0">
+										<li class="list-inline-item text-danger">Only 10 Seat Left</li>
+										<li class="list-inline-item text-success">Refundable</li>
+									</ul>
+								</div>
+							</div>
+						</div>
+						<!-- Ticket item END -->
+
+						
+
+					</div>
+				</div>
+				<!-- Main content END -->
+			</div> <!-- Row END -->
+		</div>
+	</section>
+	<!-- =======================
+	Flight list END -->
+
+	</main>
+	<!-- **************** MAIN CONTENT END **************** -->
+
+	<!-- Flight detail modal START -->
+	<div class="modal fade" id="flightdetail" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<!-- Title -->
+				<div class="modal-header">
+					<h5 class="modal-title">Flight Details</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+
+				<!-- Body -->
+				<div class="modal-body p-3">
+					<!-- Tabs START -->
+					<ul class="nav nav-pills nav-justified nav-responsive bg-primary bg-opacity-10 rounded p-2 mb-3" id="flight-pills-tab" role="tablist">
+						<!-- Tab item -->
+						<li class="nav-item" role="presentation">
+							<button class="nav-link active mb-0" id="flight-info" data-bs-toggle="pill" data-bs-target="#flight-info-tab" type="button" role="tab" aria-controls="flight-info-tab" aria-selected="true">Flight Information</button>
+						</li>
+						<!-- Tab item -->
+						<li class="nav-item" role="presentation">
+							<button class="nav-link mb-0" id="flight-fare" data-bs-toggle="pill" data-bs-target="#flight-fare-tab" type="button" role="tab" aria-controls="flight-fare-tab" aria-selected="false">Fare Detail</button>
+						</li>
+						<!-- Tab item -->
+						<li class="nav-item" role="presentation">
+							<button class="nav-link mb-0" id="flight-baggage" data-bs-toggle="pill" data-bs-target="#flight-baggage-tab" type="button" role="tab" aria-controls="flight-baggage-tab" aria-selected="false">Baggage Rules</button>
+						</li>
+						<!-- Tab item -->
+						<li class="nav-item" role="presentation">
+							<button class="nav-link mb-0" id="flight-policy" data-bs-toggle="pill" data-bs-target="#flight-policy-tab" type="button" role="tab" aria-controls="flight-policy-tab" aria-selected="false">Cancellation Rules</button>
+						</li>
+					</ul>
+					<!-- Tabs END -->
+
+					<!-- Tab content START -->
+					
+					<!-- Tab content END -->
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- Flight detail modal END -->
+{% endblock body %}
+
+{% block script %}
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        generateButtons('adult', 11);
+        generateButtons('children', 8);
+        generateButtons('infant', 4);
+
+        // Set the first button of the adults section as active by default
+        const adultButtons = document.querySelectorAll('#adultOneWay span');
+        const childrenButtons = document.querySelectorAll('#childrenOneWay span');
+        const infantButtons = document.querySelectorAll('#infantOneWay span');
+
+		var parseDataAdultCount = document.getElementById('parseDataAdultCount').innerText;
+		var parseDataChildCount = document.getElementById('parseDataChildCount').innerText;
+		var parseDataInfantCount = document.getElementById('parseDataInfantCount').innerText;
+		
+		setActive(adultButtons[parseDataAdultCount], 'adult', 'OneWay');
+		setActive(childrenButtons[parseDataChildCount], 'children', 'OneWay');
+		setActive(infantButtons[parseDataInfantCount], 'infant', 'OneWay');		
+		
+		// Event listener to close the pop-up when clicking outside of it
+		document.addEventListener('click', function(event) {
+			var form = document.getElementById('bookingFormOneWay');
+			var displayArea = document.querySelector('.display-area');
+	
+			if (form.style.display === 'block' && !form.contains(event.target) && !displayArea.contains(event.target)) {
+				form.style.display = 'none';
+			}
+		});
+	});
+
+    function generateButtons(section, count) {
+        const containerOneWay = document.getElementById(`${section}OneWay`);
+        if (!containerOneWay) {
+            console.error(`Container with ID ${section}OneWay not found.`);
+            return;
+        }
+
+        for (let i = 0; i < count; i++) {
+            const buttonOneWay = document.createElement('span');
+            buttonOneWay.textContent = i;
+            buttonOneWay.className = 'btn btn-outline-primary';
+            buttonOneWay.onclick = function() { setActive(buttonOneWay, section, 'OneWay'); };
+            containerOneWay.appendChild(buttonOneWay);
+        }
+    }
+
+    function setActive(button, section, type) {
+        const container = document.querySelectorAll(`#${section}${type} span`);
+        if (!container) {
+            console.error(`Container with ID ${section}${type} not found.`);
+            return;
+        }
+
+        container.forEach(btn => {
+            btn.classList.remove('active');
+        });
+        button.classList.add('active');
+
+        const countElement = document.getElementById(`${section}Count${type}`);
+        if (countElement) {
+            countElement.textContent = button.textContent;
+        } else {
+            console.error(`Element with ID ${section}Count${type} not found.`);
+        }
+
+        updateDisplay(); // Ensure the display is updated whenever a count changes
+    }
+
+    function updateDisplay() {
+        const adultsElement = document.getElementById('adultCountOneWay');
+        const childrenElement = document.getElementById('childrenCountOneWay');
+        const infantsElement = document.getElementById('infantCountOneWay');
+        const numTravellersElement = document.getElementById('numTravellersOneWay');
+
+        if (!adultsElement || !childrenElement || !infantsElement || !numTravellersElement) {
+            console.error("One or more required elements not found.");
+            return;
+        }
+
+        const adults = parseInt(adultsElement.textContent);
+        const children = parseInt(childrenElement.textContent);
+        const infants = parseInt(infantsElement.textContent);
+        const totalTravellers = adults + children + infants;
+
+        numTravellersElement.textContent = totalTravellers;
+    }
+
+    document.querySelector('.apply-btn').addEventListener('click', function(event) {
+        event.stopPropagation();  // Prevent event from bubbling up and closing the dropdown
+        updateDisplay();
+        toggleBookingFormOneWay();
+    });
+
+    function toggleBookingFormOneWay() {
+        var form = document.getElementById('bookingFormOneWay');
+        if (form.style.display === 'none') {
+            form.style.display = 'block';
+        } else {
+            form.style.display = 'none';
+        }
+    }
+
+    function updateTravelClass(className, element) {
+        document.getElementById('travelClassOneWay').textContent = className.toUpperCase();
+        document.querySelectorAll('#travelClassButtonsOneWay .btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        element.classList.add('active');
+    }
+
+    document.querySelectorAll('.search-btn').forEach(button => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault();  // Prevent the form from submitting immediately
+
+            var onwardFrom = document.querySelector('select[name="onwardFrom"]').value;
+            var returnFrom = document.querySelector('select[name="returnFrom"]').value;
+            var onwardTo = document.querySelector('select[name="onwardTo"]').value;
+            var returnTo = document.querySelector('select[name="returnTo"]').value;
+            var onwardDepatureDate = document.querySelector('input[name="onwardDate"]').value;
+            var returnDepartureDate = document.querySelector('input[name="returnDate"]').value;
+            var returnReturnDate = document.querySelector('input[name="returnReturnDate"]').value;
+
+            var adults = parseInt(document.getElementById('adultCountOneWay').textContent);
+            var children = parseInt(document.getElementById('childrenCountOneWay').textContent);
+            var infants = parseInt(document.getElementById('infantCountOneWay').textContent);
+            var travelClass = document.getElementById('travelClassOneWay').textContent;
+
+            var TripInfo = {
+                "Travel_Type": 0,
+                "Booking_Type": 0,
+                "TripInfo": [
+                    {
+                        "Origin": onwardFrom,
+                        "Destination": onwardTo,
+                        "TravelDate": onwardDepatureDate,  
+                        "Trip_Id": 0
+                    }
+                ],
+                "Adult_Count": adults,
+                "Child_Count": children,
+                "Infant_Count": infants,
+                "Class_Of_Travel": travelClass,
+                "InventoryType": 0,
+                "Filtered_Airline": [
+                    {
+                        "Airline_Code": ""
+                    }
+                ]
+            };
+
+            if (returnDepartureDate) {
+                TripInfo.TripInfo.push(
+                    {
+                        "Origin": returnFrom,
+                        "Destination": returnTo,
+                        "TravelDate": returnReturnDate,  
+                        "Trip_Id": 0
+                    }
+                );
+            }
+
+            // console.log("TripInfo:", TripInfo);  // Log the data to the console
+
+            var tripInfoField = document.getElementById('tripInfo');
+            tripInfoField.value = JSON.stringify(TripInfo);
+            document.getElementById('tripForm').submit();
+        });
+    });
+</script>
+
+<script>
+
+		var data = {{data2|safe}};
+		// console.log(data,typeof(data));
+		var data = JSON.parse(data);
+		// console.log(typeof(data));
+</script>
+
+<script>
+	document.addEventListener("DOMContentLoaded", function() {
+		// Access the flights array from the correct structure
+		const flightData = {{ data2|safe }}.TripDetails[0].Flights; 
+		// console.log("Total Flights:", flightData.length); // Log total number of flights
+	
+		// Reference to the container where the flight list will be added
+		const flightContainer = document.querySelector(".vstack.gap-4");
+	
+		// Check if data is valid and not empty
+		if (!Array.isArray(flightData) || flightData.length === 0) {
+			console.error("No flight data available or data is not an array");
+			flightContainer.innerHTML = "<p>No flights available.</p>";
+			return;
+		}
+	
+		// Generate HTML for each flight
+		const flightListHTML = flightData.map((flight, flightIndex) => {
+			// console.log("Processing flight index:", flightIndex, flight); // Log each flight to debug
+	
+			// Check if flight has segments
+			if (!flight.Segments || flight.Segments.length === 0) {
+				console.error(`Flight at index ${flightIndex} has no segments`);
+				return ''; // Skip flights with no segments
+			}
+	
+			// Generate HTML for the first segment only (assuming one segment per flight for simplicity)
+			const segment = flight.Segments[0];
+			return `
+			<!-- Ticket item START -->
+			<div class="card border">
+				<!-- card-body START -->
+				<div class="card-body p-4 pb-0">
+					<div class="row g-4">
+						<!-- Airline name -->
+						<div class="col-md-3">
+							<!-- Airline Logo -->
+							<img src="{% static 'API/Flight/AirlinesLogo/AirlinesLogo/' %}${flight.Airline_Code}.png" class="w-80px mb-3" alt="">
+							<!-- Airline Title -->
+							<h6 class="fw-normal mb-0">${segment.Airline_Name}</h6>
+							<h6 class="fw-normal mb-0">Flight Number: ${segment.Flight_Number}</h6>
+						</div>
+						<!-- Airport detail -->
+						<div class="col-sm-4 col-md-3">
+							<!-- Departure -->
+							<h4>${formatDate(segment.Departure_DateTime, 'H:i')}</h4>
+							<h6 class="mb-0">${formatDate(segment.Departure_DateTime, 'D')}, ${formatDate(segment.Departure_DateTime, 'd M Y')}</h6>
+							<p class="mb-0">${segment.Origin}</p>
+						</div>
+						<div class="col-sm-4 col-md-3">
+							<!-- Arrival -->
+							<h4>${formatDate(segment.Arrival_DateTime, 'H:i')}</h4>
+							<h6 class="mb-0">${formatDate(segment.Arrival_DateTime, 'D')}, ${formatDate(segment.Arrival_DateTime, 'd M Y')}</h6>
+							<p class="mb-0">${segment.Destination}</p>
+						</div>
+						<div class="col-md-3 text-md-end">
+							<!-- Price -->
+							<h4>₹ ${flight.Fares[0].FareDetails[0].Total_Amount}</h4>
+							<a href="flight-details/${flight.Flight_Key}/${flight.Fares[0].Fare_Id}" class="btn btn-dark mb-0 mb-sm-2">Book Now</a>
+							<button class="btn btn-link text-decoration-underline p-0 mb-0" data-bs-toggle="modal" data-bs-target="#flightdetail">
+								<i class="bi bi-eye-fill me-1"></i>Flight Details
+							</button>
+						</div>
+					</div>
+				</div>
+				<!-- card-body END -->
+				<!-- card footer -->
+				<div class="card-footer p-4">
+					<div class="bg-light p-2 rounded-2">
+						<ul class="list-inline d-sm-flex justify-content-sm-between mb-0 mx-4">
+							<li class="list-inline-item text-danger">Only 10 Seats Left</li>
+							<li class="list-inline-item">Total time: ${segment.Duration}</li>
+							<li class="list-inline-item text-success">Refundable</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<!-- Ticket item END -->
+			`;
+		}).join('');
+	
+		// Inject the generated HTML into the flight container
+		flightContainer.innerHTML = flightListHTML;
+	});
+	
+	// Helper function to format date and time
+	function formatDate(dateString, format) {
+		const date = new Date(dateString);
+		const options = {
+			hour: '2-digit',
+			minute: '2-digit',
+			day: '2-digit',
+			month: 'short',
+			year: 'numeric',
+			weekday: 'short'
+		};
+		if (format === 'H:i') {
+			return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+		} else if (format === 'D') {
+			return date.toLocaleDateString([], { weekday: 'short' });
+		} else if (format === 'd M Y') {
+			return date.toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' });
+		}
+		return date.toLocaleString();
+	}
+	
+	function formatDate(dateString, format) {
+		const date = new Date(dateString);
+		const options = {
+			hour: '2-digit',
+			minute: '2-digit',
+			day: '2-digit',
+			month: 'short',
+			year: 'numeric',
+			weekday: 'short'
+		};
+		if (format === 'H:i') {
+			return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+		} else if (format === 'D') {
+			return date.toLocaleDateString([], { weekday: 'short' });
+		} else if (format === 'd M Y') {
+			return date.toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' });
+		}
+		return date.toLocaleString();
+	}
+	
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Assuming 'data2' is correctly passed and JSON parsed
+        var flights = JSON.parse('{{ data2|escapejs }}').TripDetails[0].Flights;
+        
+        // console.log("Parsed Flights Data:", flights);
+
+        // Check if the data is an array and has elements
+        if (!Array.isArray(flights) || flights.length === 0) {
+            console.error("No flight data available or data is not an array");
+            return;
+        }
+
+        // Use a Set to track unique airline codes
+        const uniqueAirlines = new Set();
+        const airlines = [];
+
+        // Extract unique airlines from the flight data
+        flights.forEach(flight => {
+            flight.Segments.forEach(segment => {
+                if (!uniqueAirlines.has(segment.Airline_Code)) {
+                    uniqueAirlines.add(segment.Airline_Code);
+                    airlines.push({
+                        name: segment.Airline_Name,
+                        code: segment.Airline_Code,
+                        logo: `{% static 'API/Flight/AirlinesLogo/AirlinesLogo/' %}${segment.Airline_Code}.png`
+                    });
+                }
+            });
+        });
+
+        // Generate the HTML for airline checkboxes
+        const airlineCheckboxHTML = airlines.map((airline, index) => `
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="${airline.code}" id="airlineType${index + 1}">
+                <label class="form-check-label" for="airlineType${index + 1}">
+                    <img src="${airline.logo}" class="h-15px fa-fw me-2" alt="${airline.name} Logo">${airline.name}
+                </label>
+            </div>
+        `).join('');
+
+        // Insert the generated HTML into the container
+        const airlineContainer = document.querySelector("#airlineContainer");
+        airlineContainer.innerHTML = airlineCheckboxHTML;
+
+        // Variables to hold filter selections
+        let selectedAirlines = new Set();
+        let selectedStops = new Set();
+        let selectedLayovers = new Set();
+        let selectedPriceRange = { min: 500, max: 200000 }; // Default values for price range
+		
+	
+
+        document.querySelectorAll("#airlineContainer input[type='checkbox']").forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    selectedAirlines.add(this.value);
+                } else {
+                    selectedAirlines.delete(this.value);
+                }
+                filterFlights(); // Trigger filtering after each change
+            });
+        });
+
+        document.querySelectorAll("#btn-check-c1, #btn-check-c2, #btn-check-c3").forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    selectedStops.add(this.id);
+                } else {
+                    selectedStops.delete(this.id);
+                }
+                filterFlights(); // Trigger filtering after each change
+            });
+        });
+
+        document.querySelectorAll("#lauoverType1, #lauoverType2, #lauoverType3, #lauoverType4").forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    selectedLayovers.add(this.id);
+                } else {
+                    selectedLayovers.delete(this.id);
+                }
+                filterFlights(); // Trigger filtering after each change
+            });
+        });
+
+        // Initialize the price slider
+        let priceSlider = document.querySelector(".noui-slider-range");
+        noUiSlider.create(priceSlider, {
+            start: [700, 15000],
+            connect: true,
+            range: {
+                'min': 500,
+                'max': 20000
+            },
+            format: {
+                from: Number,
+                to: Number
+            }
+        });
+
+        // Update the selected price range on slider change
+        priceSlider.noUiSlider.on('update', function(values) {
+            selectedPriceRange.min = parseInt(values[0]);
+            selectedPriceRange.max = parseInt(values[1]);
+            filterFlights(); // Trigger filtering after each change
+        });
+		function resetFilters() {
+			document.querySelectorAll("#airlineContainer input[type='checkbox']").forEach(checkbox => {
+				checkbox.checked = false;
+			});
+			selectedAirlines.clear();
+	
+			document.querySelectorAll("#btn-check-c1, #btn-check-c2, #btn-check-c3").forEach(checkbox => {
+				checkbox.checked = false;
+			});
+			selectedStops.clear();
+	
+			document.querySelectorAll("#lauoverType1, #lauoverType2, #lauoverType3, #lauoverType4").forEach(checkbox => {
+				checkbox.checked = false;
+			});
+			selectedLayovers.clear();
+	
+			let priceSlider = document.querySelector(".noui-slider-range");
+			priceSlider.noUiSlider.set([500, 200000]);
+			selectedPriceRange = { min: 500, max: 200000 };
+	
+			filterFlights();
+		}
+	
+		document.querySelector(".clear-all").addEventListener('click', resetFilters);
+        function filterFlights() {
+            const flightContainer = document.querySelector(".vstack.gap-4");
+            const filteredFlights = flights.filter(flight => {
+                // Check airline filter
+                if (selectedAirlines.size > 0) {
+                    const airlineCodes = flight.Segments.map(seg => seg.Airline_Code);
+                    if (!airlineCodes.some(code => selectedAirlines.has(code))) return false;
+                }
+
+                // Check stop filter
+                if (selectedStops.size > 0) {
+                    const stops = flight.Segments.length - 1;
+                    if (
+                        (selectedStops.has('btn-check-c1') && stops !== 0) ||
+                        (selectedStops.has('btn-check-c2') && stops !== 1) ||
+                        (selectedStops.has('btn-check-c3') && stops > 1)
+                    ) return false;
+                }
+
+                // Check layover filter
+                if (selectedLayovers.size > 0) {
+                    const layoverAirports = flight.Segments.slice(0, -1).map(seg => seg.Destination);
+                    if (!layoverAirports.some(airport => selectedLayovers.has(airport))) return false;
+                }
+
+                // Check price filter
+                const totalPrice = flight.Fares[0].FareDetails[0].Basic_Amount + flight.Fares[0].FareDetails[0].AirportTax_Amount;
+                if (totalPrice < selectedPriceRange.min || totalPrice > selectedPriceRange.max) return false;
+
+                return true;
+            });
+
+            // Generate HTML for filtered flights
+            const flightListHTML = filteredFlights.map((flight) => {
+                return generateFlightHTML(flight);
+            }).join('');
+            // console.log("Selected Airlines:", selectedAirlines);
+            // console.log("Selected Stops:", selectedStops);
+            // console.log("Selected Layovers:", selectedLayovers);
+            // console.log("Selected Price Range:", selectedPriceRange);
+            // console.log("Filtered Flights:", filteredFlights);
+
+            // Update the flight container with filtered flights
+            flightContainer.innerHTML = flightListHTML || "<p>No flights available with the selected filters.</p>";
+        }
+
+        function generateFlightHTML(flight) {
+            if (!flight.Segments || flight.Segments.length === 0) {
+                console.error(`Flight has no segments`);
+                return '';
+            }
+
+            return `
+            <!-- Ticket item START -->
+            <div class="card border">
+                <!-- card-body START -->
+                <div class="card-body p-4 pb-0">
+                    ${flight.Segments.map((segment, index) => index === 0 ? `
+                    <div class="row g-4">
+                        <!-- Airline name -->
+                        <div class="col-md-3">
+                            <!-- Image -->
+                            <img src="{% static 'API/Flight/AirlinesLogo/AirlinesLogo/' %}${segment.Airline_Code}.png" class="w-80px mb-3" alt="">
+                            <!-- Title -->
+                            <h6 class="fw-normal mb-0">${segment.Airline_Name}</h6>
+                            <h6 class="fw-normal mb-0">Flight Number: ${segment.Flight_Number}</h6>
+                        </div>
+                        <!-- Airport detail -->
+                        <div class="col-sm-4 col-md-3">
+                            <!-- Title -->
+                            <h4>${formatDate(segment.Departure_DateTime, 'H:i')}</h4>
+                            <h6 class="mb-0">${formatDate(segment.Arrival_DateTime, 'D')}, ${formatDate(segment.Arrival_DateTime, 'd M Y')}</h6>
+                            <p class="mb-0">${segment.Origin}</p>
+                        </div>
+                        <div class="col-sm-4 col-md-3">
+                            <h4>${formatDate(segment.Arrival_DateTime, 'H:i')}</h4>
+                            <h6 class="mb-0">${formatDate(segment.Arrival_DateTime, 'D')}, ${formatDate(segment.Arrival_DateTime, 'd M Y')}</h6>
+                            <p class="mb-0">${segment.Destination}</p>
+                        </div>
+                        <div class="col-md-3 text-md-end">
+                            <!-- Price -->
+                            <h4>₹ ${flight.Fares[0].FareDetails[0].Basic_Amount + flight.Fares[0].FareDetails[0].AirportTax_Amount}</h4>
+                            <a href="flight-details/${flight.Flight_Key}/${flight.Fares[0].Fare_Id}" class="btn btn-dark mb-0 mb-sm-2">Book Now</a>
+                            <button class="btn btn-link text-decoration-underline p-0 mb-0" data-bs-toggle="modal" data-bs-target="#flightdetail">
+                                <i class="bi bi-eye-fill me-1"></i>Flight Details
+                            </button>
+                        </div>
+                    </div>
+                    <!-- card-body END -->
+                    <!-- card footer -->
+                    <div class="card-footer p-4">
+                        <div class="bg-light p-2 rounded-2">
+                            <ul class="list-inline d-sm-flex justify-content-sm-between mb-0 mx-4">
+                                <li class="list-inline-item text-danger">Only 10 Seats Left</li>
+                                <li class="list-inline-item">Total time: ${segment.Duration}</li>
+                                <li class="list-inline-item text-success">Refundable</li>
+                            </ul>
+                        </div>
+                    </div>` : '').join('')}
+                </div>
+            </div>
+            <!-- Ticket item END -->
+            `;
+        }
+
+        function formatDate(dateString, format) {
+            const date = new Date(dateString);
+            const options = {
+                hour: '2-digit',
+                minute: '2-digit',
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                weekday: 'short'
+            };
+            if (format === 'H:i') {
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            } else if (format === 'D') {
+                return date.toLocaleDateString([], { weekday: 'short' });
+            } else if (format === 'd M Y') {
+                return date.toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' });
+            }
+            return date.toLocaleString();
+        }
+    });
+</script>
+
+	
+
+
+
+
+{% comment %} page js {% endcomment %}
+<script src="{% static 'vendor/nouislider/nouislider.min.js' %}"></script>
+{% endblock script %}
