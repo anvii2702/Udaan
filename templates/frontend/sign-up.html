@@ -121,7 +121,7 @@ Main Content START -->
 								<p class="mb-0">Already a member?<a href="{% url 'sign_in' %}"> Log in</a></p>
 		
 								<!-- Form START -->
-								<form class="mt-4 text-start" method="post" action="{% url 'sign_up' %}">
+								<form class="mt-4 text-start" method="POST" action="{% url 'sign_up' %}">
 									{% csrf_token %}
 									<!-- Username -->
 									<div class="mb-3">

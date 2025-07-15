@@ -32,7 +32,7 @@ sale_choices=(("Local_Hotel","Inventory Hotel"),
                  )
 
 class CustomUser(AbstractUser, PermissionsMixin):
-    username = None
+    username = models.CharField(('username'),unique=True,null=True)
     email = models.EmailField(('email address main'), unique=True)
     first_name = models.CharField(('first name'), max_length=30, blank=True)
     last_name = models.CharField(('last name'), max_length=150, blank=True)

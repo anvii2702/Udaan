@@ -154,5 +154,7 @@ flyshop_IP = "47.31.166.210"
 
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024 # 10 Mb limit
 
+AUTH_USER_MODEL='users.CustomUser'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

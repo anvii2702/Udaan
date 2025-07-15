@@ -3,10 +3,10 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
-from rest.api import *
+from django.contrib.auth import get_user_model
 
 # Create your views here.
+User=get_user_model()
 def index_user(request):
     json_file_path_airport = 'static/API/Flight/airport.json'
     with open(json_file_path_airport, 'r', encoding='utf-8') as json_file:
@@ -41,9 +41,9 @@ def sign_up(request):
 
 def sign_in(request):
     if request.method == "POST":
-        email = request.POST['email']
+        username = request.POST.get('username')
         password = request.POST['password']
-        user = authenticate(request, username=email, password=password)
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
             login(request, user)
