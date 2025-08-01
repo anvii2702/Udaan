@@ -17,5 +17,5 @@ Including another URLconf
 from django.urls import path ,include
 from . import views
 urlpatterns = [
-    path('infinite-scroll/', views.infinite_scroll_view, name='infinite-scroll'),    
+    # path('infinite-scroll/', views.infinite_scroll_view, name='infinite-scroll'),    
 ]

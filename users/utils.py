@@ -1,7 +1,7 @@
 import random
 import time
-from .models import Journal  # Replace 'yourapp' with the actual name of your Django app
-
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.http import HttpResponseBadRequest
 def generate_unique_transaction(balance, email, amount, booking_id):
     while True:
         # Extract relevant information
@@ -30,8 +30,7 @@ def generate_unique_transaction(balance, email, amount, booking_id):
             return Transaction_id
    
    
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.http import HttpResponseBadRequest
+
 
 # Encode the email address into a URL-safe string
 def encode_email(email):
