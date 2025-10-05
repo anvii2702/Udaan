@@ -5,7 +5,7 @@ import re
 from django.shortcuts import get_object_or_404
 from django.shortcuts import HttpResponse, redirect, render
 from django.contrib.auth import authenticate, login, logout
-
+from django.contrib import messages
 from .models import *
 from django.http import HttpResponsePermanentRedirect, HttpResponseRedirect, JsonResponse
 from datetime import datetime, timezone
@@ -39,33 +39,58 @@ def Logout(request):
     logout(request)
     return redirect('/')
 
-def Signup(request):
-    if request.method == "POST":
-        f_name = request.POST.get('first__name')
-        l_name = request.POST.get('last__name')
-        mobile = request.POST.get('mobile__no')
-        email = request.POST.get('registration__email')
-        password1 = request.POST.get('login[password]')
-        password2 = request.POST.get('password_2')
-        if request.POST.get('Agent'):
-            Agent_ = True
-        else:
-            Agent_ = False
 
-        u = CustomUser.objects.create_user(contact_no=mobile, password=password1, email=email, first_name=f_name, last_name=l_name, is_staff=False, is_active=True, is_customer=True, is_Agent=Agent_,)
-        u.save()
-        ##print(type(u))
-        ##print(u)
-        if 'Agent' in request.POST:
             
-           Agent.objects.create(user=u, is_Varified=False, PanCard='', AadharCard='', Gstno='', Address='')
+    #        Agent.objects.create(user=u, is_Varified=False, PanCard='', AadharCard='', Gstno='', Address='')
           
-           return redirect('/Users/login/')
-        else:
-            return redirect("/Users/login/")
-    else:
+    #        return redirect('/Users/login/')
+    #     else:
+    #         return redirect("/Users/login/")
+    # else:
          
-        return render(request, 'signup.html')
+    #     return render(request, 'signup.html')
+def Sign_up(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+
+        if password1 != password2:
+            messages.error(request, 'Passwords do not match.')
+            return redirect('sign_up')
+
+        if CustomUser.objects.filter(username=username).exists():
+            messages.error(request, 'Username already exists.')
+            return redirect('sign_up')
+
+        if CustomUser.objects.filter(email=email).exists():
+            messages.error(request, 'Email already registered.')
+            return redirect('sign_up')
+
+        user = CustomUser.objects.create_user(username=username, email=email, password=password1)
+        user.save()
+        messages.success(request, 'Account created successfully. Please log in.')
+        return redirect('sign_in')
+
+    return render(request, 'frontend/sign-up.html')
+
+
+def Sign_in(request):
+    if request.method == "POST":
+        email = request.POST.get('email')
+        password = request.POST['password']
+        user = authenticate(request, email=email, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('index_user')
+        else:
+            error = "Invalid email or password."
+            return render(request, 'frontend/sign-in.html', {'error': error})
+    else:
+        return render(request, 'frontend/sign-in.html')
+
 
 def Forgot_Password(request):
 

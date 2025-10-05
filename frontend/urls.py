@@ -20,8 +20,6 @@ from . import views
 urlpatterns = [
     # Frontend
     path('', views.index_user, name='index_user'),
-    path('sign-up/', views.sign_up, name='sign_up'),
-    path('sign-in/', views.sign_in, name='sign_in'),
     path('aboutus/', views.about_us, name='about_us'),
     path('contacus/', views.contact_us, name='contact_us'),
     path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
