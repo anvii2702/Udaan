@@ -13,6 +13,10 @@ def index_user(request):
     return render(request, 'frontend/index.html', context={'data_airport': data_airport})
 
 
+def superadmin(request):
+    return render(request,'dashboard/superadmin-dashboard.html')
+
+
 def about_us(request):
     return render(request,'frontend/about.html')
 
@@ -28,12 +32,10 @@ def terms_and_conditions(request):
 def flight_listing(request):
     if request.method == "GET":
         try:
-            max_price = 0
-            
-            dataGet = request.GET.get('onward')
+            dataGet = request.GET.get('tripInfo')
+            print(dataGet,"1")
             dataGetDict = json.loads(dataGet)
-            print(dataGetDict)
-
+            print(dataGet,"2")
             # Load airport data (unchanged)
             json_file_path_airport = 'static/API/Flight/airport.json'   
             with open(json_file_path_airport, 'r', encoding='utf-8') as json_file:
@@ -50,7 +52,8 @@ def flight_listing(request):
 
             # print(type(data), 'Flight data loaded from JSON')
 
-            if not data:
+            if not dataGet:
+                print("hello")
                 return render(request, "404.html", context={"image":"images/flights/plane.png", "heading":"No Flights Available", "url":"/", "page":"Home", "message":"No flights were found for this route and date combination. Modify your search and try again"})
 
             # Assuming the JSON structure contains a "TripDetails" key
@@ -86,10 +89,4 @@ def flight_booking(request):
 def staff_dashboard(request):
     return render(request,'dashboard/admin-dashboard.html')
 
-def my_login(request):
-    return redirect('sign_in')
 
-def logout_view(request):
-    logout(request)
-    messages.success(request, 'You have been logged out.')
-    return redirect('my_login')
