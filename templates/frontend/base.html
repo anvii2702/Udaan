@@ -252,9 +252,27 @@
 				</li>
 				
 				<!-- Sign In button -->
-				<li class="nav-item ms-2 d-none d-sm-block">
-					<a href="/sign-up" class="btn btn-sm btn-primary-soft mb-0"><i class="fa-solid fa-right-to-bracket me-2"></i>Sign Up</a>
-				</li>
+				 {% if user.is_authenticated %}
+        <!-- Dropdown for logged-in user -->
+						<li class="nav-item dropdown ms-2 d-none d-sm-block">
+						<a class="btn btn-sm btn-primary-soft dropdown-toggle mb-0" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+						<i class="fa-solid fa-user me-2"></i>{{ user.first_name|default:user.username }}
+						</a>
+						<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+						<li><a class="dropdown-item" href="/profile"><i class="fa-solid fa-user-gear me-2"></i>Profile</a></li>
+						<li><a class="dropdown-item" href="/reset-password"><i class="fa-solid fa-key me-2"></i>Change Password</a></li>
+						<li><hr class="dropdown-divider"></li>
+						<li><a class="dropdown-item text-danger" href="/logout"><i class="fa-solid fa-right-from-bracket me-2"></i>Logout</a></li>
+						</ul>
+						</li>
+{% else %}
+<!-- Sign Up button for guests -->
+<li class="nav-item ms-2 d-none d-sm-block">
+<a href="/sign-up" class="btn btn-sm btn-primary-soft mb-0"><i class="fa-solid fa-right-to-bracket me-2"></i>Sign Up</a>
+</li>
+{% endif %}
+
+				
 			</ul>
 			<!-- Navbar right side END -->
 
