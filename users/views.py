@@ -31,7 +31,9 @@ def Sign_up(request):
             return redirect('sign_up')
 
         user = CustomUser.objects.create_user(username=username, email=email, password=password1)
+        user.is_customer=True
         user.save()
+        Customer.objects.create(user=user)
         messages.success(request, 'Account created successfully. Please log in.')
         return redirect('sign_in')
 
@@ -51,9 +53,7 @@ def Sign_in(request):
             elif hasattr(user,'staff_profile'):
                 print('2')
                 return redirect ('staff_dashboard')
-            elif hasattr(user,'customer_profile'):
-                print('3')
-                return redirect ('index_user')
+            return redirect ('index_user')
         else:       
             error = "Invalid email or password."
             return render(request, 'frontend/sign-in.html', {'error': error})

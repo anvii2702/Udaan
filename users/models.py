@@ -43,13 +43,14 @@ class CustomUser(AbstractUser):
     role=models.CharField(max_length=20,choices=ROLE_CHOICES,default='user')
     last_login=models.DateTimeField(blank=True,null=True)
     is_admin=models.BooleanField(default=False)
+    is_customer=models.BooleanField(default=False)
 
     @property
     def is_adminuser(self):
         return hasattr(self,"staff_profile")
     
     @property
-    def is_customer(self):
+    def is_customeruser(self):
         return hasattr(self,"customer_profile")
 
     @property
@@ -87,13 +88,14 @@ class Customer(models.Model):
         CustomUser, on_delete=models.CASCADE,related_name="customer_profile")
     
     def save(self, *args, **kwargs):
-
         if hasattr(self.user, "staff_profile"):
             raise ValueError("This user is already a Staff, cannot be a Customer")
         super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return f"{self.user.email} (Customer)"
 
-
-class Staff(models.Model):
+class Admin(models.Model):
     id=models.UUIDField(primary_key=True,default=uuid.uuid4,editable=False)
     user = models.OneToOneField(
         CustomUser, on_delete=models.CASCADE,related_name="staff_profile" )
@@ -103,5 +105,6 @@ class Staff(models.Model):
         if hasattr(self.user, "customer_profile"):
             raise ValueError("This user is already a Customer, cannot be Staff")
         super().save(*args, **kwargs)
-
-
+ 
+    def __str__(self):
+        return f"{self.user.email} (Admin)"

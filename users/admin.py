@@ -5,8 +5,8 @@ from django.contrib.admin.sites import AdminSite
 
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    list_display = ('email','is_staff','is_active' ,'balance',"role","is_admin")
-    list_filter = ('email','is_staff','is_active' ,'balance','is_admin')
+    list_display = ('email','is_staff','is_active' ,'balance',"role","is_admin","is_customer")
+    list_filter = ('email','is_staff','is_active' ,'balance','is_admin','is_customer')
     readonly_fields = ('balance',)
     fieldsets = (
         (None,{'fields':('email','password')}),
@@ -14,7 +14,7 @@ class CustomUserAdmin(UserAdmin):
     )
     add_fieldsets = (
         (None,{'classes':('wide',),
-               'fields':('email','password1','password2','is_staff','is_active' ,'balance','is_admin')}),
+               'fields':('email','password1','password2','is_staff','is_active' ,'balance','is_admin','is_customer')}),
         
     )
     search_fields = ('email',)
@@ -23,7 +23,7 @@ class CustomUserAdmin(UserAdmin):
     
    
 admin.site.register(CustomUser,CustomUserAdmin)
-admin.site.register(Staff)
+admin.site.register(Admin)
 admin.site.register(Customer)
 
 
